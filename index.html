@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIG Student Analysis | Detailed Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;      
+            --card-bg: #151C2C;      
+            --card-border: #2A344A;  
+            --primary: #6366F1;      
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent: #0EA5E9;       
+            --text-main: #F8FAFC;    
+            --text-muted: #94A3B8;   
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #F43F5E;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; padding: 0 0 5rem 0; overflow-x: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+
+        header { text-align: center; margin-bottom: 2.5rem; margin-top: 1rem; }
+        h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
+        .subtitle { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1.25rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        .card-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-title::before { content: ''; display: inline-block; width: 4px; height: 1.2rem; background: var(--primary); border-radius: 4px; }
+
+        /* Search Box */
+        .search-box { display: flex; flex-direction: column; gap: 1rem; max-width: 600px; margin: 0 auto; }
+        @media (min-width: 600px) { .search-box { flex-direction: row; } }
+        input { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--card-border); color: var(--text-main); padding: 1rem 1.25rem; font-size: 1rem; border-radius: 0.75rem; outline: none; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+        button { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 1rem 1.5rem; font-size: 1rem; font-weight: 700; border: none; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--primary-glow); }
+        button:disabled { background: var(--card-border); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Profile Grid */
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1rem; }
+        .info-group { display: flex; flex-direction: column; }
+        .info-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 0.25rem; }
+        .info-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); word-break: break-word; }
+
+        /* Dynamic Detail Grid for Attendance/Student Info */
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .detail-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 1rem; border-radius: 0.75rem; transition: transform 0.2s; }
+        .detail-card:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.1); }
+        .detail-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin-bottom: 0.25rem; word-break: break-all; letter-spacing: 0.05em;}
+        .detail-value { font-size: 1.15rem; font-weight: 800; color: var(--text-main); word-break: break-word; }
+
+        /* Massive Data Tables */
+        .sem-container { margin-bottom: 2.5rem; }
+        .sem-header { font-size: 1.25rem; font-weight: 800; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; }
+        
+        .table-wrapper { 
+            overflow-x: auto; 
+            border: 1px solid var(--card-border); 
+            border-radius: 0.75rem; 
+            background: rgba(0,0,0,0.2); 
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        
+        th, td { 
+            padding: 0.8rem 1rem; 
+            border-bottom: 1px solid var(--card-border); 
+            white-space: nowrap; 
+            font-size: 0.85rem;
+        }
+        
+        th { 
+            background: #1A2235; 
+            color: var(--text-muted); 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        td:first-child, th:first-child {
+            position: sticky;
+            left: 0;
+            background: #1A2235;
+            z-index: 11;
+            border-right: 1px solid var(--card-border);
+            font-weight: 700;
+        }
+        td:first-child { color: var(--accent); }
+        th:first-child { z-index: 12; }
+
+        tr:hover td { background: rgba(255, 255, 255, 0.03); }
+        tr:last-child td { border-bottom: none; }
+
+        .col-grade { font-weight: 800; }
+        .col-marks { font-weight: 700; color: var(--text-main); }
+        .grade-pass { color: var(--success); }
+        .grade-fail { color: var(--danger); }
+
+        /* Utilities */
+        .loader-container { display: none; text-align: center; padding: 3rem 0; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--card-border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #dashboard { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast */
+        #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .toast { background: var(--card-bg); border: 1px solid var(--card-border); color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; font-size: 0.9rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); opacity: 0; transform: translateY(20px); transition: all 0.3s; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.success { border-left: 4px solid var(--success); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>GIG Student Analysis</h1>
+            <div class="subtitle">Detailed Semester-Wise Report</div>
+        </header>
+
+        <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+            <div class="search-box">
+                <input type="text" id="pinInput" placeholder="Enter PIN (e.g., 23054-EV-037)" autocomplete="off">
+                <button id="fetchBtn" onclick="fetchData()">Generate Report</button>
+            </div>
+        </div>
+
+        <div id="loader" class="loader-container">
+            <div class="spinner"></div>
+            <p style="color: var(--text-muted); font-weight: 500;">Extracting full academic history...</p>
+        </div>
+
+        <div id="dashboard">
+            
+            <div class="card">
+                <h2 class="card-title">Student Profile</h2>
+                <div class="profile-grid">
+                    <div class="info-group">
+                        <span class="info-label">Name</span>
+                        <span class="info-value" id="ui-name">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">PIN</span>
+                        <span class="info-value" id="ui-pin">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Branch</span>
+                        <span class="info-value" id="ui-branch">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Scheme</span>
+                        <span class="info-value" id="ui-scheme">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">CGPA</span>
+                        <span class="info-value" id="ui-cgpa" style="color: var(--accent);">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Total Credits</span>
+                        <span class="info-value" id="ui-credits">--</span>
+                    </div>
+                    <div class="info-group" style="grid-column: 1 / -1;">
+                        <span class="info-label">Center Name</span>
+                        <span class="info-value" id="ui-center" style="font-size: 0.95rem;">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="extended-info-card" style="display: none;">
+                <h2 class="card-title" style="color: var(--accent);">📁 In-Depth Student Info</h2>
+                <div class="detail-grid" id="student-info-grid">
+                    </div>
+                
+                <h2 class="card-title" style="color: var(--success); border-top: 1px solid var(--card-border); padding-top: 1.5rem; margin-top: 0.5rem;">📁 Attendance Summary</h2>
+                <div class="detail-grid" id="attendance-summary-grid" style="margin-bottom: 0;">
+                    </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="margin-bottom: 1.5rem;">Detailed Semester Breakdown</h2>
+                <div id="semesters-container">
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function fetchData() {
+            const pin = document.getElementById('pinInput').value.trim();
+            if (!pin) return showToast("Please enter a PIN", "error");
+
+            const btn = document.getElementById('fetchBtn');
+            const loader = document.getElementById('loader');
+            const dashboard = document.getElementById('dashboard');
+
+            btn.disabled = true;
+            dashboard.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                // Fetching both APIs simultaneously
+                const [attResponse, resResponse] = await Promise.all([
+                    fetch(`/api/attendance?pin=${pin}`).then(r => r.json()).catch(() => null),
+                    fetch(`/api/results?pin=${pin}`).then(r => r.json()).catch(() => null)
+                ]);
+
+                if ((!resResponse || !resResponse.success) && (!attResponse || !attResponse.success)) {
+                    throw new Error("No data found for this PIN in SBTET system.");
+                }
+
+                populateDetailedDashboard(attResponse, resResponse?.data, pin);
+                showToast("Report generated successfully!");
+                dashboard.style.display = 'block';
+            } catch (error) {
+                showToast(error.message, "error");
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        }
+
+        function populateDetailedDashboard(attData, resultsData, fallbackPin) {
+            
+            // --- 1. POPULATE DEEP DIVE ATTENDANCE/INFO SECTION ---
+            if (attData && attData.success) {
+                document.getElementById('extended-info-card').style.display = 'block';
+                
+                const sInfo = attData.studentInfo || {};
+                const aSum = attData.attendanceSummary || {};
+                
+                // Build Student Info Grid
+                const sGrid = document.getElementById('student-info-grid');
+                sGrid.innerHTML = '';
+                Object.keys(sInfo).forEach(key => {
+                    let val = sInfo[key];
+                    if (val === null || val === '') val = "-";
+                    sGrid.innerHTML += `
+                        <div class="detail-card">
+                            <div class="detail-label">${key}</div>
+                            <div class="detail-value">${val}</div>
+                        </div>`;
+                });
+
+                // Build Attendance Summary Grid
+                const aGrid = document.getElementById('attendance-summary-grid');
+                aGrid.innerHTML = '';
+                Object.keys(aSum).forEach(key => {
+                    let val = aSum[key];
+                    if (val === null || val === '') val = "-";
+                    // Add a percent sign if the key implies it
+                    if (key.toLowerCase().includes('percentage') && val !== "-") val += "%";
+                    
+                    aGrid.innerHTML += `
+                        <div class="detail-card" style="border-color: rgba(16, 185, 129, 0.2);">
+                            <div class="detail-label" style="color: var(--success);">${key}</div>
+                            <div class="detail-value">${val}</div>
+                        </div>`;
+                });
+            } else {
+                document.getElementById('extended-info-card').style.display = 'none';
+            }
+
+
+            // --- 2. POPULATE RESULTS SECTION ---
+            if (!resultsData) return;
+
+            const profileTable = (resultsData.Table && resultsData.Table.length > 0) ? resultsData.Table[0] : {};
+            const statsTable = (resultsData.Table1 && resultsData.Table1.length > 0) ? resultsData.Table1[0] : {};
+
+            document.getElementById('ui-name').innerText = profileTable.StudentName || profileTable.Name || "--";
+            document.getElementById('ui-pin').innerText = profileTable.Pin || fallbackPin;
+            document.getElementById('ui-branch').innerText = profileTable.BranchCode || "--";
+            document.getElementById('ui-scheme').innerText = profileTable.Scheme || "--";
+            document.getElementById('ui-center').innerText = profileTable.CenterName || "--";
+            
+            document.getElementById('ui-cgpa').innerText = statsTable.CGPA || statsTable.Cgpa || "--";
+            document.getElementById('ui-credits').innerText = `${statsTable.CreditsGained || '--'} / ${statsTable.TotalMaxCredits || '--'}`;
+
+            const subjectsRaw = resultsData.Table2 || [];
+            
+            if (subjectsRaw.length === 0) {
+                document.getElementById('semesters-container').innerHTML = "<p style='text-align:center; color: var(--text-muted);'>No detailed subject data found.</p>";
+                return;
+            }
+
+            const columnsConfig = [
+                { key: 'Subject_Code', label: 'Code' },
+                { key: 'SubjectName', label: 'Subject Name' },
+                { key: 'HybridGrade', label: 'Grade' },
+                { key: 'SubjectTotal', label: 'Total Marks' },
+                { key: 'GradePoint', label: 'Grade Point' },
+                { key: 'TotalGradePoints', label: 'Total GP' },
+                { key: 'CreditsGained', label: 'Credits' },
+                { key: 'MaxCredits', label: 'Max Cred' },
+                { key: 'InternalMarks', label: 'Internal' },
+                { key: 'Mid1Marks', label: 'Mid 1' },
+                { key: 'Mid2Marks', label: 'Mid 2' },
+                { key: 'EndExamMarks', label: 'End Exam' },
+                { key: 'ExamMonthYear', label: 'Exam Session' },
+                { key: 'ExamStatus', label: 'Status' },
+                { key: 'WholeOrSupply', label: 'Type' },
+                { key: 'SchemeID', label: 'Scheme ID' },
+                { key: 'SequenceId', label: 'Seq ID' },
+                { key: 'SubjectOrder', label: 'Order' },
+                { key: 'Branch_Code', label: 'Branch' }
+            ];
+
+            const subjectsBySem = {};
+            subjectsRaw.forEach(sub => {
+                const sem = sub.Semester || "Unknown Semester";
+                if (!subjectsBySem[sem]) subjectsBySem[sem] = [];
+                subjectsBySem[sem].push(sub);
+            });
+
+            const sortedSems = Object.keys(subjectsBySem).sort((a,b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
+            const container = document.getElementById('semesters-container');
+            container.innerHTML = '';
+
+            sortedSems.forEach(sem => {
+                let html = `
+                <div class="sem-container">
+                    <div class="sem-header">📅 ${sem}</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                `;
+                
+                columnsConfig.forEach(col => {
+                    html += `<th>${col.label}</th>`;
+                });
+                html += `</tr></thead><tbody>`;
+
+                subjectsBySem[sem].forEach(row => {
+                    html += `<tr>`;
+                    columnsConfig.forEach(col => {
+                        let val = row[col.key];
+                        if (val === null || val === undefined || val === '') val = "-";
+                        
+                        let cellClass = "";
+                        if (col.key === 'HybridGrade') {
+                            cellClass = "col-grade ";
+                            cellClass += (['F', 'FAIL'].includes(String(val).toUpperCase())) ? 'grade-fail' : 'grade-pass';
+                        } else if (col.key === 'SubjectTotal') {
+                            cellClass = "col-marks";
+                        }
+
+                        html += `<td class="${cellClass}">${val}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+
+                html += `</tbody></table></div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        document.getElementById('pinInput').addEventListener('keypress', e => { if (e.key === 'Enter') fetchData(); });
+    </script>
+</body>
+</html>
